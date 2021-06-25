@@ -11,6 +11,11 @@ jobs:
     name: Lint shell script
     runs-on: ubuntu-18.04
     steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          clean: true
+      - run: 'command -v shellcheck || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y shellcheck; fi ||:'
       - run: 'shellcheck *.bash'
 
   test_action:
@@ -19,29 +24,38 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Need full checkout to push to gitlab mirror
+          fetch-depth: 0
           clean: true
       - uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+        name: 'Build & sign RPM'
         id: build-and-sign-rpm
         with:
           gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
           gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
-          path_to_build: test/pupmod
-      - run: |
+          path_to_build: tests/pupmod
+      - name: 'Check basic results'
+        run: |
           [ -z "$rpm_file_path" ] && { echo '::error ::$rpm_file_path cannot be empty!'; exit 88; }
           [ -z "$rpm_file_basename" ] && { echo '::error ::$rpm_file_basename cannot be empty!'; exit 88; }
           if [ ! -f "$rpm_file_path" ]; then
-            printf '::error ::No file founf at $rpm_file_path (got "%s")!\n' "$rpm_file_path"
+            printf '::error ::No file found at $rpm_file_path (got "%s")!\n' "$rpm_file_path"
             exit 88
           fi
-          echo "--- pwd: '$PWD'"
-          echo "=== rpm_file_path: '${rpm_file_path}'"
-          echo "=== rpm_file_basename: '${rpm_file_basename}'"
-          apt-get update
-          apt-get install rpm -y
-          rpm -qip "$rpm_file_path"
         env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.output.rpm_file_path }}
-          rpm_file_name: ${{ steps.build-and-sign-rpm.output.rpm_file_name }}
+          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+          rpm_file_basename: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
+      - run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
+      - name: 'Very RPM info is readable'
+        run: |
+          rpm -qip "$rpm_file_path" || { echo '::error ::Error reading RPM info from $rpm_file_path'; exit 88; }
+        env:
+          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+      - name: 'Very RPM info is correct'
+        run: |
+          rpm_version="$(rpm -q --qf '%{RPMTAG_VERSION}' -p "$rpm_file_path")"
+          [[ "$rpm_version" == "1.2.3" ]] || { echo "::error ::Expected RPM version '1.2.3', got '$rpm_version'"; exit 88; }
+        env:
+          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+
 

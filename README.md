@@ -55,37 +55,33 @@ following (using a previous **`contributor-permissions`** job to determine if
 the Pull Request submitter is trusted):
 
 ```yaml
-  trigger-when-user-has-repo-permissions:
-    name: 'Trigger CI [trusted users only]'
-    needs: [ glci-syntax, contributor-permissions ]
+  test_action:
+    name: Test build & sign pupmod RPM
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-        if: needs.contributor-permissions.outputs.permitted == 'true'
         with:
+          fetch-depth: 0
           clean: true
-          fetch-depth: 0  # Need full checkout to push to gitlab mirror
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Trigger CI when user has Repo Permissions
-        if: needs.contributor-permissions.outputs.permitted == 'true'
-        uses: simp/github-action-build-and-sign-pkg-single-rpm@v1
+      - uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+        name: 'Build & sign RPM'
+        id: build-and-sign-rpm
         with:
-          git_branch: ${{ github.event.pull_request.head.ref }}
-          git_hashref:  ${{ github.event.pull_request.head.sha }}
-          gitlab_api_private_token: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
-          gitlab_group: ${{ github.event.organization.login }}
-          github_repository: ${{ github.repository }}
-          github_repository_owner: ${{ github.repository_owner }}
-
-      - name: When user does NOT have Repo Permissions
-        if: needs.contributor-permissions.outputs.permitted == 'false'
-        continue-on-error: true
+          gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
+          gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
+          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
+          path_to_build: tests/pupmod
+      - name: 'Check basic results'
         run: |
-          echo "Ending gracefully; Contributor $GITHUB_ACTOR does not have permission to trigger CI"
-          false
-
+          [ -z "$rpm_file_path" ] && { echo '::error ::$rpm_file_path cannot be empty!'; exit 88; }
+          [ -z "$rpm_file_basename" ] && { echo '::error ::$rpm_file_basename cannot be empty!'; exit 88; }
+          if [ ! -f "$rpm_file_path" ]; then
+            printf '::error ::No file found at $rpm_file_path (got "%s")!\n' "$rpm_file_path"
+            exit 88
+          fi
+        env:
+          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+          rpm_file_basename: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
 ```
 
 
@@ -124,7 +120,7 @@ the Pull Request submitter is trusted):
   <tr>
     <td><strong><code>path_to_build</code></strong></td>
     <td>No</td>
-    <td>Path to directory to build<br /><em>Default:</em> <code>.</code></td>
+    <td>Path to directory to build<br /><em>Default:</em> <code>${{ github.workspace }}</code></td>
   </tr>
 
   <tr>

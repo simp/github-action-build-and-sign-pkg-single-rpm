@@ -4,12 +4,13 @@
   "author": "SIMP",
   "summary": "The minimum module required to build an RPM",
   "license": "Apache-2.0",
-  "source": "https://github.com/simp/pupmod-simp-dummy",
+  "source": "https://github.com/simp/github-action-build-and-sign-pkg-single-rpm",
   "project_page": "https://www.simp-project.com/",
   "issues_url": "https://simp-project.atlassian.net/",
   "tags": [
-    "simp",
-    "dummy"
+    "github",
+    "actions",
+    "test"
   ],
   "dependencies": [
     {

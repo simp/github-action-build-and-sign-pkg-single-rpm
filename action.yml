@@ -2,6 +2,7 @@
 name: 'Build and Sign RPM using `pkg:single`'
 description: 'Builds an RPM using `rake pkg:single` inside a SIMP build container and signs with a GPG key'
 author: 'SIMP Team'
+
 inputs:
   gpg_signing_key:
     description: "ASCII-armored content of the GPG signing key's secret/private key"
@@ -15,7 +16,7 @@ inputs:
   path_to_build:
     description: 'Path to directory to build'
     required: false
-    default: '.'
+    default: ${{ github.workspace }}
   simp_builder_docker_image:
     description: >
       SIMP build container image to stage build.  So far, the action has only
@@ -26,6 +27,7 @@ inputs:
     description: 'A ref (usually tagged release) in simp-core that is stable enough to build RPMs'
     required: false
     default: '6.5.0-1'
+
 outputs:
   rpm_file_path:
     description: 'Local path to the new RPM'

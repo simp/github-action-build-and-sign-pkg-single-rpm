@@ -62,9 +62,9 @@ docker container rm -f "$BUILD_CONTAINER"
 
 # shellcheck disable=SC2010
 rpm_file="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
+rpm_file_path="$(realpath "$rpm_file")"
 
 # Output path of RPM file and the base filename of the RPM
-echo "::set-output name=rpm_file_path::$(realpath "$rpm_file")"
-echo "::set-output name=rpm_file_basename::$(basename "$rpm_file")"
-
-echo "Built RPM '$rpm_file'"
+echo "::set-output name=rpm_file_path::$rpm_file_path"
+echo "::set-output name=rpm_file_basename::$(basename "$rpm_file_path")"
+echo "Built RPM '$rpm_file_path'"
