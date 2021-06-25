@@ -28,7 +28,7 @@ of this before using.
 
 ## Description
 
-A [Github action] to build and sign an RPM from the current directory
+A [Github action] to build and sign an RPM using `pkg:single` from simp-core
 
 1. Pulls down SIMP build container
 2. Prepares build and signing environment

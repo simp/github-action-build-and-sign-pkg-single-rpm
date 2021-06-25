@@ -1,6 +1,8 @@
 ---
 name: 'Build and Sign RPM using `pkg:single`'
-description: 'Builds an RPM using `rake pkg:single` inside a SIMP build container and signs with a GPG key'
+description: >
+  Builds an RPM using `rake pkg:single` inside a SIMP build container and signs
+  with a GPG key
 author: 'SIMP Team'
 
 inputs:
