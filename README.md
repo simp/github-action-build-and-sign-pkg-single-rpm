@@ -2,11 +2,6 @@
 
 Build and sign an RPM from the current directory (using `rake pkg:single`)
 
-Note that this requires the **secret (private) GPG signing key** as input;
-understand the [security implications](#warning-security-implications-warning)
-of this before using.
-
-
 [![Verify Action](https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/workflows/Verify%20Action/badge.svg)](https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/actions?query=workflow%3A%22Verify+Action%22)
 [![tag badge](https://img.shields.io/github/v/tag/simp/github-action-build-and-sign-pkg-single-rpm)](https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/tags)
 [![license badge](https://img.shields.io/github/license/simp/github-action-build-and-sign-pkg-single-rpm)](./LICENSE)
@@ -15,6 +10,7 @@ of this before using.
 <!-- vim-markdown-toc GFM -->
 
 * [Description](#description)
+  * [Process](#process)
 * [Usage](#usage)
 * [Reference](#reference)
   * [Action Inputs](#action-inputs)
@@ -29,6 +25,12 @@ of this before using.
 ## Description
 
 A [Github action] to build and sign an RPM using `pkg:single` from simp-core
+
+Note that this requires the **secret (private) GPG signing key** as input;
+understand the [security implications](#warning-security-implications-warning)
+of this before using the action.
+
+### Process
 
 1. Pulls down SIMP build container
 2. Prepares build and signing environment
@@ -63,7 +65,7 @@ the Pull Request submitter is trusted):
         with:
           fetch-depth: 0
           clean: true
-      - uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+      - uses: simp/github-action-build-and-sign-pkg-single-rpm@v1
         name: 'Build & sign RPM'
         id: build-and-sign-rpm
         with:
