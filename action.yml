@@ -1,0 +1,55 @@
+---
+name: 'Build and Sign RPM using `pkg:single`'
+description: 'Builds an RPM using `rake pkg:single` inside a SIMP build container and signs with a GPG key'
+author: 'SIMP Team'
+inputs:
+  gpg_signing_key:
+    description: "ASCII-armored content of the GPG signing key's secret/private key"
+    required: true
+  gpg_signing_key_id:
+    description: "GPG signing key's GPG ID (name)"
+    required: true
+  gpg_signing_key_passphrase:
+    description: 'Passphrase to use the GPG signing key'
+    required: true
+  path_to_build:
+    description: 'Path to directory to build'
+    required: false
+    default: '.'
+  simp_builder_docker_image:
+    description: >
+      SIMP build container image to stage build.  So far, the action has only
+      been tested with (and probably only works with) the EL8 build image'
+    required: false
+    default: 'docker.io/simpproject/simp_build_centos8:latest'
+  simp_core_ref_for_building_rpms:
+    description: 'A ref (usually tagged release) in simp-core that is stable enough to build RPMs'
+    required: false
+    default: '6.5.0-1'
+outputs:
+  rpm_file_path:
+    description: 'Local path to the new RPM'
+    value: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+  rpm_file_basename:
+    description: 'Filename of the new RPM'
+    value: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
+
+branding:
+  icon: box
+  color: green
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Build and Sign RPM using `pkg:single`'
+      id: build-and-sign-rpm
+      shell: bash
+      env:
+        SIMP_DEV_GPG_SIGNING_KEY: ${{ inputs.gpg_signing_key }}
+        SIMP_DEV_GPG_SIGNING_KEY_ID: ${{ inputs.gpg_signing_key_id }}
+        SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE: ${{ inputs.gpg_signing_key_passphrase }}
+        PATH_TO_BUILD: ${{ inputs.path_to_build }}
+        SIMP_CORE_REF_FOR_BUILDING_RPMS: ${{ inputs.simp_core_ref_for_building_rpms }}
+        SIMP_BUILD_IMAGE: ${{ inputs.simp_builder_docker_image }}
+      run: ${{ github.action_path }}/build-signed-pkg-single-rpm.bash
+

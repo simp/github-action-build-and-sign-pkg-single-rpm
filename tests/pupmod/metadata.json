@@ -1,0 +1,60 @@
+{
+  "name": "simp-rpm_build_test",
+  "version": "1.2.3",
+  "author": "SIMP",
+  "summary": "The minimum module required to build an RPM",
+  "license": "Apache-2.0",
+  "source": "https://github.com/simp/pupmod-simp-dummy",
+  "project_page": "https://www.simp-project.com/",
+  "issues_url": "https://simp-project.atlassian.net/",
+  "tags": [
+    "simp",
+    "dummy"
+  ],
+  "dependencies": [
+    {
+      "name": "simp/iptables",
+      "version_requirement": ">= 6.0.1 < 7.0.0"
+    },
+    {
+      "name": "simp/simplib",
+      "version_requirement": ">= 3.15.0 < 5.0.0"
+    },
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 4.13.1 < 7.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "6",
+        "7",
+        "8"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "6",
+        "7",
+        "8"
+      ]
+    },
+    {
+      "operatingsystem": "OracleLinux",
+      "operatingsystemrelease": [
+        "6",
+        "7",
+        "8"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": ">= 5.0.0 < 7.0.0"
+    }
+  ]
+}

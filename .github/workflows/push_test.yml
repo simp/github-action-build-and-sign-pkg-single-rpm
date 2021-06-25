@@ -1,0 +1,47 @@
+---
+name: Verify Action
+on:
+  push:
+    branches:
+      - main
+      - releases/*
+
+jobs:
+  lint_shell:
+    name: Lint shell script
+    runs-on: ubuntu-18.04
+    steps:
+      - run: 'shellcheck *.bash'
+
+  test_action:
+    name: Test build & sign pupmod RPM
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Need full checkout to push to gitlab mirror
+          clean: true
+      - uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+        id: build-and-sign-rpm
+        with:
+          gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
+          gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
+          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
+          path_to_build: test/pupmod
+      - run: |
+          [ -z "$rpm_file_path" ] && { echo '::error ::$rpm_file_path cannot be empty!'; exit 88; }
+          [ -z "$rpm_file_basename" ] && { echo '::error ::$rpm_file_basename cannot be empty!'; exit 88; }
+          if [ ! -f "$rpm_file_path" ]; then
+            printf '::error ::No file founf at $rpm_file_path (got "%s")!\n' "$rpm_file_path"
+            exit 88
+          fi
+          echo "--- pwd: '$PWD'"
+          echo "=== rpm_file_path: '${rpm_file_path}'"
+          echo "=== rpm_file_basename: '${rpm_file_basename}'"
+          apt-get update
+          apt-get install rpm -y
+          rpm -qip "$rpm_file_path"
+        env:
+          rpm_file_path: ${{ steps.build-and-sign-rpm.output.rpm_file_path }}
+          rpm_file_name: ${{ steps.build-and-sign-rpm.output.rpm_file_name }}
+

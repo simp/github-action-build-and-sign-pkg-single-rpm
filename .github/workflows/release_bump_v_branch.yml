@@ -1,0 +1,40 @@
+# For releases with a SemVer tag, update the corresponding `v*` branch HEAD
+---
+name: 'Release: Bump `v*` branch HEAD'
+on:
+  release:
+    types:
+      - released
+    tags: '[0-9]+.[0-9]+.[0-9]'
+
+jobs:
+  check_tag:
+    name: 'Tag must be SemVer'
+    runs-on: ubuntu-20.04
+    outputs:
+      update_v_branch: ${{ steps.check-tag.outputs.update_v_branch }}
+    steps:
+      - name: check tag ${{ github.ref }}
+        id: check-tag
+        run: |
+          if [[ ${{ github.event.release.tag_name }} =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::set-output name=update_v_branch::true"
+          else
+            echo "::set-output name=update_v_branch::false"
+          fi
+
+  release_bump_v_branch:
+    name: 'Update `v*` branch on release'
+    needs: [check_tag]
+    if: needs.check_tag.outputs.update_v_branch == 'true'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Need full checkout to push to gitlab mirror
+      - name: 'Set HEAD of vX branch to release tag'
+        run: |
+          git remote add github "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
+          branch="$(echo '${{ github.event.release.tag_name }}' | sed -e 's/^v//' | awk -F. '{print "v" $1}')"
+          git checkout -B "$branch"
+          git push -u github "$branch" -f
