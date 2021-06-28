@@ -14,8 +14,8 @@ BUILD_CONTAINER=build_el8
 BUILD_PATH=/home/build_user/simp-core/_pupmod_to_build
 BUILD_PATH_BASENAME="$(basename "$BUILD_PATH")"
 
-# So far we haven't needed to log into the docker registry to pull the image,
-# but we probably will:
+# So far we haven't needed to log into the docker registry to pull the image
+# but at some point, we probably will:
 ### docker login "$DOCKER_REGISTRY" -u "$DOCKER_USERNAME" --password-stdin <<< "$DOCKER_PASSWORD"
 
 # Pull down the build container and copy the local directory into it
@@ -31,7 +31,8 @@ docker exec "$BUILD_CONTAINER" /bin/bash -c "chown --reference=\"\$(dirname '$BU
 # ------------------------------------------------------------------------------
 # SIMP pupmod RPMs must be built from simp-core using `rake pkg:single` to
 # ensure release-specific dependencies are included
-docker exec "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout $SIMP_CORE_REF_FOR_BUILDING_RPMS; bundle; bundle exec rake pkg:single[\$PWD/${BUILD_PATH_BASENAME}]'"
+docker exec "$BUILD_CONTAINER" /bin/bash -c \
+  "su -l build_user -c 'cd simp-core; git fetch origin; git checkout $SIMP_CORE_REF_FOR_BUILDING_RPMS; bundle; bundle exec rake pkg:single[\$PWD/${BUILD_PATH_BASENAME}]'"
 
 # 1. Add GPG signing key to build container without touching any filesystems
 # 2. Set up GPG to sign non-interactively
@@ -41,19 +42,23 @@ docker exec "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'cd simp-core; 
 
 # Add the GPG signing key
 # shellcheck disable=SC2016
-docker exec -i -e "KEY=$SIMP_DEV_GPG_SIGNING_KEY" "$BUILD_CONTAINER" /bin/bash -c 'echo "$KEY" | su -l build_user -c "gpg --batch --import"'
+docker exec -i -e "KEY=$SIMP_DEV_GPG_SIGNING_KEY" "$BUILD_CONTAINER" /bin/bash -c \
+  'echo "$KEY" | su -l build_user -c "gpg --batch --import"'
 
 # Set up the preset passphrase
-docker exec -i "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf; gpg-connect-agent reloadagent /bye'"
+docker exec -i "$BUILD_CONTAINER" /bin/bash -c \
+  "su -l build_user -c 'echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf; gpg-connect-agent reloadagent /bye'"
 
 # shellcheck disable=SC2016
 keygrip_cmd="$(printf 'grp="$(gpg --with-keygrip --with-colons -K "%s" | awk -F: "/grp:/ {print \$10}")"; /usr/libexec/gpg-preset-passphrase --preset %s <<< %s' "$SIMP_DEV_GPG_SIGNING_KEY_ID" '"$grp"' "$(printf "'\$PASS'\n")" )"
-docker exec -e "PASS=$SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE" -i "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf ; gpg-connect-agent reloadagent /bye; $keygrip_cmd'"
+docker exec -e "PASS=$SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE" -i "$BUILD_CONTAINER" /bin/bash -c \
+  "su -l build_user -c 'echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf ; gpg-connect-agent reloadagent /bye; $keygrip_cmd'"
 
 # Sign the RPM!
 # shellcheck disable=SC2016
 sign_cmd="$(printf 'rpmsign --define "_gpg_name %s" --define "_gpg_path ~/.gnupg" --resign ' "$SIMP_DEV_GPG_SIGNING_KEY_ID")"
-docker exec -i "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'ls -1 $BUILD_PATH/dist/*.rpm | grep -v src.rpm$ | xargs $sign_cmd'"
+docker exec -i "$BUILD_CONTAINER" /bin/bash -c \
+  "su -l build_user -c 'ls -1 $BUILD_PATH/dist/*.rpm | grep -v src.rpm$ | xargs $sign_cmd'"
 
 # Copy RPM back out to local filesystem
 # ------------------------------------------------------------------------------
