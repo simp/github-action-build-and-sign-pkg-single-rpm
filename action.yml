@@ -31,8 +31,11 @@ inputs:
     default: '6.5.0-1'
 
 outputs:
+  rpm_file_paths:
+    description: 'Local absolute paths to new RPM(s), pipe-delimited'
+    value: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
   rpm_file_path:
-    description: 'Local path to the new RPM'
+    description: 'Local path to the new RPM (single-RPM builds only)'
     value: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
   rpm_file_basename:
     description: 'Filename of the new RPM'

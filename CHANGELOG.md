@@ -8,9 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Add support and tests for:
+  - non-module asset RPMs (e.g., repos with their own Rakefile and RPM .spec)
+  - `pkg:single` builds of multiple RPMs (includes src RPMs)
+- Now exports GPG public key used to validate signed RPMs
+- New output variables:
+  - `rpm_dist_dir`
+  - `gpg_file_path`
+  - `gpg_file_basename`
 - Updated README example to reflect `@v1` release
-- Add test to demonstrate that the action can build non-module assets RPMs, too
-
 
 ## [1.0.0] - 2021-06-25
 
