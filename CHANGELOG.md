@@ -9,14 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Updated README example to reflect `@v1` release
+- Add test to demonstrate that the action can build non-module assets RPMs, too
 
-<!--
-### Changed
-
-### Fixed
-
-### Removed
--->
 
 ## [1.0.0] - 2021-06-25
 

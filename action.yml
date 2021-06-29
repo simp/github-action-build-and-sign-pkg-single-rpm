@@ -37,6 +37,15 @@ outputs:
   rpm_file_basename:
     description: 'Filename of the new RPM'
     value: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
+  rpm_dist_dir:
+    description: 'Local path to RPM dist/ dir'
+    value: ${{ steps.build-and-sign-rpm.outputs.rpm_dist_dir }}
+  gpg_file_path:
+    description: 'Local path to GPG public key file'
+    value: ${{ steps.build-and-sign-gpg.outputs.gpg_file_path }}
+  gpg_file_basename:
+    description: 'Filename of GPG public key file'
+    value: ${{ steps.build-and-sign-gpg.outputs.gpg_file_basename }}
 
 branding:
   icon: box

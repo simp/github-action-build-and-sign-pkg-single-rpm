@@ -8,11 +8,13 @@ if [ ! -d "$PATH_TO_BUILD" ]; then
   exit 88
 fi
 cd "$PATH_TO_BUILD"
+rm -rf dist
 
 BUILD_IMAGE="${SIMP_BUILD_IMAGE:-docker.io/simpproject/simp_build_centos8:latest}"
 BUILD_CONTAINER=build_el8
 BUILD_PATH=/home/build_user/simp-core/_pupmod_to_build
 BUILD_PATH_BASENAME="$(basename "$BUILD_PATH")"
+RPM_GPG_KEY_EXPORT_NAME="${RPM_GPG_KEY_EXPORT_NAME:-RPM-GPG-KEY-SIMP-UNSTABLE-2}"
 
 # So far we haven't needed to log into the docker registry to pull the image
 # but at some point, we probably will:
@@ -57,19 +59,38 @@ docker exec -e "PASS=$SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE" -i "$BUILD_CONTAINER"
 # Sign the RPM!
 # shellcheck disable=SC2016
 sign_cmd="$(printf 'rpmsign --define "_gpg_name %s" --define "_gpg_path ~/.gnupg" --resign ' "$SIMP_DEV_GPG_SIGNING_KEY_ID")"
+
 docker exec -i "$BUILD_CONTAINER" /bin/bash -c \
   "su -l build_user -c 'ls -1 $BUILD_PATH/dist/*.rpm | grep -v src.rpm$ | xargs $sign_cmd'"
 
+# Export the GPG key
+# shellcheck disable=SC2016
+export_cmd="$(printf 'gpg --armor --export "%s" > "%s/dist/%s.pub.asc"' \
+  "$SIMP_DEV_GPG_SIGNING_KEY_ID" \
+  "$BUILD_PATH" \
+  "$RPM_GPG_KEY_EXPORT_NAME" \
+)"
+echo "== EXPORT CMD: '$export_cmd'"
+docker exec -i "$BUILD_CONTAINER" /bin/bash -c \
+  "su -l build_user -c 'ls -1 $BUILD_PATH/dist/*.rpm | grep -v src.rpm$ | xargs $export_cmd'"
+
+
 # Copy RPM back out to local filesystem
 # ------------------------------------------------------------------------------
-docker cp "$BUILD_CONTAINER:$BUILD_PATH/dist/" dist
+docker cp "$BUILD_CONTAINER:$BUILD_PATH/dist" ./
 docker container rm -f "$BUILD_CONTAINER"
 
+# FIXME: doesn't handle multiple RPMs
 # shellcheck disable=SC2010
 rpm_file="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
 rpm_file_path="$(realpath "$rpm_file")"
+gpg_file="$(ls -1r "dist/${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
+gpg_file_path="$(realpath "$gpg_file")"
 
 # Output path of RPM file and the base filename of the RPM
 echo "::set-output name=rpm_file_path::$rpm_file_path"
 echo "::set-output name=rpm_file_basename::$(basename "$rpm_file_path")"
+echo "::set-output name=rpm_dist_dir::$(dirname "$rpm_file_path")"
+echo "::set-output name=gpg_file_path::$gpg_file_path"
+echo "::set-output name=gpg_file_basename::$(basename "$gpg_file_path")"
 echo "Built RPM '$rpm_file_path'"
