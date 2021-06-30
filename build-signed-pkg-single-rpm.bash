@@ -76,20 +76,23 @@ set_github_output_variables()
   # shellcheck disable=SC2010
   rpm_file="$(ls -1r dist/*.rpm | grep -v '\.src\.rpm$' | head -1)"
   rpm_file_path="$(realpath "$rpm_file")"
-  gpg_file="$(find "dist/${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
+  gpg_file="$(find "dist" -name "${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
+  export gpg_file_path=''
   gpg_file_path="$(realpath "$gpg_file")"
 
-  rpm_file_paths="$(find "$PWD/dist" -name \*.rpm -print0 | tr '\0' '|' | sed -e 's/|$//' )"
-  rpm_file_paths_count="$(echo "$rpm_file_paths" | tr '|' '\n' | wc -l)"
+  rpm_file_paths="$(find "$PWD/dist" -name \*.rpm)"
+  rpm_file_paths_count="$(echo "$rpm_file_paths" | wc -l)"
 
+  rpm_file_paths="${rpm_file_paths//'%'/'%25'}"
+  rpm_file_paths="${rpm_file_paths//$'\n'/'%0A'}"
+  rpm_file_paths="${rpm_file_paths//$'\r'/'%0D'}"
 
   # v1.1.0 (for v2)
   echo "::set-output name=rpm_file_paths::$rpm_file_paths"
-  echo "::set-output name=gpg_file_path::$gpg_file_path"
+  echo "::set-output name=rpm_gpg_file::$(realpath "$gpg_file")"
 
   # v1.1.0 (deprecated in v2)
   echo "::set-output name=rpm_dist_dir::$(dirname "$rpm_file_path")"
-  echo "::set-output name=gpg_file_basename::$(basename "$gpg_file_path")"
 
   # Output path of RPM file and the base filename of the RPM
   # v1.0.0 (deprecated in v2)
@@ -98,6 +101,8 @@ set_github_output_variables()
 
   echo "Built ${rpm_file_paths_count} RPMs: "
   echo "$rpm_file_paths" | tr '|' '\n' | sed -e 's/^/    /'
+  echo
+  echo "GPG public key: ${gpg_file_path}"
 }
 
 

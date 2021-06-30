@@ -33,7 +33,10 @@ inputs:
 outputs:
   rpm_file_paths:
     description: 'Local absolute paths to new RPM(s), pipe-delimited'
-    value: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+    value: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
+  rpm_gpg_file:
+    description: 'xxx'
+    value: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
   rpm_file_path:
     description: 'Local path to the new RPM (single-RPM builds only)'
     value: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
@@ -43,12 +46,6 @@ outputs:
   rpm_dist_dir:
     description: 'Local path to RPM dist/ dir'
     value: ${{ steps.build-and-sign-rpm.outputs.rpm_dist_dir }}
-  gpg_file_path:
-    description: 'Local path to GPG public key file'
-    value: ${{ steps.build-and-sign-gpg.outputs.gpg_file_path }}
-  gpg_file_basename:
-    description: 'Filename of GPG public key file'
-    value: ${{ steps.build-and-sign-gpg.outputs.gpg_file_basename }}
 
 branding:
   icon: box

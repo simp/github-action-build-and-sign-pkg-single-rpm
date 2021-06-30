@@ -18,142 +18,68 @@ jobs:
       - run: 'command -v shellcheck || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y shellcheck; fi ||:'
       - run: 'shellcheck *.bash'
 
-  test_action_with_simp_pupmod:
-    name: Test build & sign pupmod RPM
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          clean: true
-      - uses: simp/github-action-build-and-sign-pkg-single-rpm@main
-        name: 'Build & sign RPM'
-        id: build-and-sign-rpm
-        with:
-          gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
-          gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
-          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
-          path_to_build: tests/pupmod
-      - name: 'Check basic results'
-        run: |
-          [ -z "$rpm_file_path" ] && { echo '::error ::$rpm_file_path cannot be empty!'; exit 88; }
-          [ -z "$rpm_file_basename" ] && { echo '::error ::$rpm_file_basename cannot be empty!'; exit 88; }
-          if [ ! -f "$rpm_file_path" ]; then
-            printf '::error ::No file found at $rpm_file_path (got "%s")!\n' "$rpm_file_path"
-            exit 88
-          fi
-        env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
-          rpm_file_basename: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
-      - run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
-      - name: 'Very RPM info is readable'
-        run: |
-          rpm -qip "$rpm_file_path" || { echo '::error ::Error reading RPM info from $rpm_file_path'; exit 88; }
-        env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
-      - name: 'Very RPM info is correct'
-        run: |
-          rpm_version="$(rpm -q --qf '%{RPMTAG_VERSION}' -p "$rpm_file_path")"
-          [[ "$rpm_version" == "1.2.3" ]] || { echo "::error ::Expected RPM version '1.2.3', got '$rpm_version'"; exit 88; }
-        env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
-
-  test_action_with_single_asset:
-    name: Test build & sign single asset RPM
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          clean: true
-      - uses: simp/github-action-build-and-sign-pkg-single-rpm@main
-        name: 'Build & sign RPM'
-        id: build-and-sign-rpm
-        with:
-          gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
-          gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
-          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
-          path_to_build: tests/asset-with-single-package
-      - name: 'Check basic results'
-        run: |
-          [ -z "$rpm_file_path" ] && { echo '::error ::$rpm_file_path cannot be empty!'; exit 88; }
-          [ -z "$rpm_file_basename" ] && { echo '::error ::$rpm_file_basename cannot be empty!'; exit 88; }
-          if [ ! -f "$rpm_file_path" ]; then
-            printf '::error ::No file found at $rpm_file_path (got "%s")!\n' "$rpm_file_path"
-            exit 88
-          fi
-        env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
-          rpm_file_basename: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
-      - run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
-      - name: 'Very RPM info is readable'
-        run: |
-          rpm -qip "$rpm_file_path" || { echo '::error ::Error reading RPM info from $rpm_file_path'; exit 88; }
-        env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
-      - name: 'Very RPM info is correct'
-        run: |
-          rpm_version="$(rpm -q --qf '%{RPMTAG_VERSION}' -p "$rpm_file_path")"
-          [[ "$rpm_version" == "1.2.3" ]] || { echo "::error ::Expected RPM version '1.2.3', got '$rpm_version'"; exit 88; }
-        env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
-
 
   test_action_with_multiple_assets:
-    name: Test build & sign multiple asset RPMs
+    name: Build & Sign
     runs-on: ubuntu-18.04
+    strategy:
+       matrix:
+         build:
+           - label: 'multiple asset RPMs'
+             path_to_build: 'tests/asset-with-multiple-packages'
+             expected_rpm_count: 4
+           - label: 'single asset RPM'
+             path_to_build: 'tests/asset-with-single-package'
+             expected_rpm_count: 2
+           - label: 'pupmod RPM'
+             path_to_build: 'tests/pupmod'
+             expected_rpm_count: 2
+         build_container:
+           - 'docker.io/simpproject/simp_build_centos8:latest'
     steps:
+      - name: 'Ensure `rpm` is installed'
+        run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
           clean: true
       - uses: simp/github-action-build-and-sign-pkg-single-rpm@main
-        name: 'Build & sign RPM'
+        name: 'Build & sign RPM(s) under ${{ matrix.build.path_to_build }}'
         id: build-and-sign-rpm
         with:
           gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
           gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
-          path_to_build: tests/asset-with-multiple-packages
-      - name: 'Check basic RPM results'
+          path_to_build: ${{ matrix.build.path_to_build }}
+          simp_builder_docker_image: ${{ matrix.build_container }}
+      - name: 'Validate RPM & GPG files for ${{ matrix.build.label }}'
         env:
           rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
+          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
+          expected_rpm_count: ${{ matrix.build.expected_rpm_count }}
         run: |
           [ -z "$rpm_file_paths" ] && { echo '::error ::$rpm_file_paths cannot be empty!'; exit 88; }
-          files=(${rpm_file_paths//,/ })
-          echo "== rpm_file_paths: $rpm_file_paths"
-          for file in "${files[@]}"; do
-          if [ ! -f "$file" ]; then
-            printf '::error ::No file found at $file (got "%s")!\n' "$file"
+          files=(${rpm_file_paths})
+
+          [ "${#files[@]}" -eq "$expected_rpm_count" ]  || \
+            { echo "::error ::Expected ${expected_rpm_count} RPM files, got ${#files[@]}"; exit 88; }
+          echo "Found expected number of files ($expected_rpm_count)"
+
+          if [ ! -f "$rpm_gpg_file" ]; then
+            printf '::error ::No file found at $rpm_gpg_file (got "%s")!\n' "$rpm_gpg_file"
             exit 88
           fi
-      - name: 'Check basic GPG results'
-        env:
-          gpg_file_path: ${{ steps.build-and-sign-rpm.outputs.gpg_file_path }}
-        run: |
-          [ -z "$gpg_file_path" ] && { echo '::error ::$gpg_file_path cannot be empty!'; exit 88; }
-          if [ ! -f "$gpg_file_path" ]; then
-            printf '::error ::No file found at $gpg_file_path (got "%s")!\n' "$gpg_file_path"
-            exit 88
-          fi
-      - run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
-      - name: 'Very RPM info is readable'
-        run: |
-          files=(${rpm_file_paths//,/ })
-          echo "== rpm_file_paths: $rpm_file_paths"
+          echo "Found GPG public key file: $rpm_gpg_file"
+
+          sudo rpm --import "$rpm_gpg_file"
+
           for file in "${files[@]}"; do
             echo "-- $file"
+            if [ ! -f "$file" ]; then
+              printf '::error ::No file found at $file (got "%s")!\n' "$file"
+              exit 88
+            fi
             rpm -qip "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
-          done
-        env:
-          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
-      - name: 'Very RPM info is correct'
-        run: |
-          files=(${rpm_file_paths//,/ })
-          for file in "${files[@]}"; do
             rpm_version="$(rpm -q --qf '%{RPMTAG_VERSION}' -p "$file")"
             [[ "$rpm_version" == "1.2.3" ]] || { echo "::error ::Expected RPM version '1.2.3', got '$rpm_version': $file"; exit 88; }
           done
-        env:
-          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
-

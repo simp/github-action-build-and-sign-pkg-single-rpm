@@ -52,13 +52,13 @@ sub is required for the proper functionality of main
 %files doc
 
 %changelog
-* Thu Aug 31 2017 Jane Doe <jane.doe@simp.com> - 4.0.3
+* Thu Aug 31 2017 Jane Doe <jane.doe@simp.com> - 1.2.3
 - Fix bug Z
   - Thanks to Lilia Smith for the PR!
 
-* Mon Jun 12 2017 Jane Doe <jane.doe@simp.com> - 4.0.3
+* Mon Jun 12 2017 Jane Doe <jane.doe@simp.com> - 1.2.3
 - Prompt user for new input
 
-* Fri Jun 02 2017 Jim Jones <jim.jones@simp.com> - 4.0.2-0
+* Fri Jun 02 2017 Jim Jones <jim.jones@simp.com> - 1.2.3-0
 - Expand X
 - Fix Y
