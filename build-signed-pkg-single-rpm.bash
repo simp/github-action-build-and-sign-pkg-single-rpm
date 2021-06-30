@@ -79,8 +79,8 @@ set_github_output_variables()
   gpg_file="$(find "dist/${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
   gpg_file_path="$(realpath "$gpg_file")"
 
-  rpm_file_paths="$(find "$PWD/dist" -name \*.rpm -print0 | tr '\0' ',' | sed -e 's/,$//' )"
-  rpm_file_paths_count="$(echo "$rpm_file_paths" | tr ',' '\n' | wc -l)"
+  rpm_file_paths="$(find "$PWD/dist" -name \*.rpm -print0 | tr '\0' '|' | sed -e 's/|$//' )"
+  rpm_file_paths_count="$(echo "$rpm_file_paths" | tr '|' '\n' | wc -l)"
 
 
   # v1.1.0 (for v2)
@@ -97,7 +97,7 @@ set_github_output_variables()
   echo "::set-output name=rpm_file_basename::$(basename "$rpm_file_path")"
 
   echo "Built ${rpm_file_paths_count} RPMs: "
-  echo "$rpm_file_paths" | tr ',' '\n' | sed -e 's/^/    /'
+  echo "$rpm_file_paths" | tr '|' '\n' | sed -e 's/^/    /'
 }
 
 

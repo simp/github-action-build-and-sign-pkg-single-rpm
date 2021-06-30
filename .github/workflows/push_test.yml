@@ -59,7 +59,7 @@ jobs:
           rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
 
   test_action_with_single_asset:
-    name: Test build & sign single asset
+    name: Test build & sign single asset RPM
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -100,7 +100,7 @@ jobs:
 
 
   test_action_with_multiple_asset:
-    name: Test build & sign multiple asset packages
+    name: Test build & sign multiple asset RPMs
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -124,18 +124,18 @@ jobs:
             exit 88
           fi
         env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
-          rpm_file_basename: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
+          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
       - run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
       - name: 'Very RPM info is readable'
         run: |
+          echo "== rpm_file_paths: $rpm_file_paths"
           rpm -qip "$rpm_file_path" || { echo '::error ::Error reading RPM info from $rpm_file_path'; exit 88; }
         env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
       - name: 'Very RPM info is correct'
         run: |
           rpm_version="$(rpm -q --qf '%{RPMTAG_VERSION}' -p "$rpm_file_path")"
           [[ "$rpm_version" == "1.2.3" ]] || { echo "::error ::Expected RPM version '1.2.3', got '$rpm_version'"; exit 88; }
         env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
 
