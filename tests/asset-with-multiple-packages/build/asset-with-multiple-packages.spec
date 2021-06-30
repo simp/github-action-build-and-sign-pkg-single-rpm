@@ -2,8 +2,8 @@
 
 %global gemdir /usr/share/simp/ruby
 %global geminstdir %{gemdir}/gems/%{gemname}-%{version}
-%global main_version 4.0.3
-%global sub_version 1.7.8
+%global main_version 1.2.3
+%global sub_version 1.2.3
 
 Summary: a main package
 Name: main
