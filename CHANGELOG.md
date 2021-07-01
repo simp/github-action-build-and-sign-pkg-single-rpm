@@ -4,19 +4,39 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+<!--
 ## [Unreleased]
 
 ### Added
 
-- Add support and tests for:
-  - non-module asset RPMs (e.g., repos with their own Rakefile and RPM .spec)
-  - `pkg:single` builds of multiple RPMs (includes src RPMs)
-- Now exports GPG public key used to validate signed RPMs
+### Changed
+
+### Fixed
+
+### Removed
+-->
+
+## [2.0.0] - 2021-07-01
+
+### Added
+
+- Support and tests for:
+  - Non-module asset RPMs (e.g., repos with their own Rakefile and RPM .spec)
+  - Multiple RPM files
+  - .src.rpm files
+  - Public GPG keys for RPM signatures
 - New output variables:
+  - `rpm_file_paths`
+  - `rpm_gpg_files`
   - `rpm_dist_dir`
-  - `gpg_file_path`
-  - `gpg_file_basename`
-- Updated README example to reflect `@v1` release
+- Updated README example to reflect ~~`@v1`~~ `@v2` release
+
+### Removed
+
+- Output variables:
+  - `rpm_file_path`
+  - `rpm_file_basename`
+
 
 ## [1.0.0] - 2021-06-25
 
@@ -30,4 +50,5 @@ Initial release!
 - This changelog
 
 [1.0.0]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/releases/tag/1.0.0
-[Unreleased]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/1.0.0...HEAD
+[2.0.0]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/1.0.0...2.0.0
+[Unreleased]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.0.0...HEAD

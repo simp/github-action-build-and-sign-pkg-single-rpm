@@ -19,9 +19,9 @@ jobs:
       - run: 'shellcheck *.bash'
 
 
-  test_action_with_multiple_assets:
+  test_action:
     name: Build & Sign
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
        matrix:
          build:
@@ -82,4 +82,5 @@ jobs:
             rpm -qip "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
             rpm_version="$(rpm -q --qf '%{RPMTAG_VERSION}' -p "$file")"
             [[ "$rpm_version" == "1.2.3" ]] || { echo "::error ::Expected RPM version '1.2.3', got '$rpm_version': $file"; exit 88; }
+            echo "RPM is expected version: $file"
           done

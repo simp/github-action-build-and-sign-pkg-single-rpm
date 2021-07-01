@@ -65,30 +65,35 @@ the Pull Request submitter is trusted):
         with:
           fetch-depth: 0
           clean: true
-      - uses: simp/github-action-build-and-sign-pkg-single-rpm@v1
-        name: 'Build & sign RPM'
+      - uses: simp/github-action-build-and-sign-pkg-single-rpm@v2
+        name: 'Build & sign RPM(s)'
         id: build-and-sign-rpm
         with:
           gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
           gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
-          path_to_build: tests/pupmod
       - name: 'Check basic results'
+        env:
+          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
+          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
+          expected_rpm_count: ${{ matrix.build.expected_rpm_count }}
         run: |
-          [ -z "$rpm_file_path" ] && { echo '::error ::$rpm_file_path cannot be empty!'; exit 88; }
-          [ -z "$rpm_file_basename" ] && { echo '::error ::$rpm_file_basename cannot be empty!'; exit 88; }
-          if [ ! -f "$rpm_file_path" ]; then
-            printf '::error ::No file found at $rpm_file_path (got "%s")!\n' "$rpm_file_path"
+          [ -z "$rpm_file_paths" ] && { echo '::error ::$rpm_file_paths cannot be empty!'; exit 88; }
+          files=(${rpm_file_paths})
+
+          [ "${#files[@]}" -eq "$expected_rpm_count" ]  || \
+            { echo "::error ::Expected ${expected_rpm_count} RPM files, got ${#files[@]}"; exit 88; }
+          echo "Found expected number of files ($expected_rpm_count)"
+
+          if [ ! -f "$rpm_gpg_file" ]; then
+            printf '::error ::No file found at $rpm_gpg_file (got "%s")!\n' "$rpm_gpg_file"
             exit 88
           fi
-        env:
-          rpm_file_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
-          rpm_file_basename: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
+          echo "Found GPG public key file: $rpm_gpg_file"
 ```
 
 
 ## Reference
-
 
 ### Action Inputs
 
@@ -151,13 +156,18 @@ the Pull Request submitter is trusted):
   </thead>
 
   <tr>
-    <td><strong><code>rpm_file_path</code></strong></td>
-    <td>Local path to the new RPM</td>
+    <td><strong><code>rpm_file_paths</code></strong></td>
+    <td>Local absolute paths to new RPM(s)</td>
   </tr>
 
   <tr>
-    <td><strong><code>rpm_file_basename</code></strong></td>
-    <td>Filename of the new RPM</td>
+    <td><strong><code>rpm_gpg_file</code></strong></td>
+    <td>Local absolute path to public GPG signing key</td>
+  </tr>
+
+  <tr>
+    <td><strong><code>rpm_dist_dir</code></strong></td>
+    <td>Local absolute path to RPM `dist/` dir</td>
   </tr>
 </table>
 

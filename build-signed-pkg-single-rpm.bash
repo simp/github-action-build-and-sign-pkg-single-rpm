@@ -4,7 +4,6 @@
 # ensure release-specific dependencies are included
 # ------------------------------------------------------------------------------
 
-
 # Pull down the build container and copy the local directory into it
 start_build_container()
 {
@@ -87,17 +86,9 @@ set_github_output_variables()
   rpm_file_paths="${rpm_file_paths//$'\n'/'%0A'}"
   rpm_file_paths="${rpm_file_paths//$'\r'/'%0D'}"
 
-  # v1.1.0 (for v2)
   echo "::set-output name=rpm_file_paths::$rpm_file_paths"
   echo "::set-output name=rpm_gpg_file::$(realpath "$gpg_file")"
-
-  # v1.1.0 (deprecated in v2)
   echo "::set-output name=rpm_dist_dir::$(dirname "$rpm_file_path")"
-
-  # Output path of RPM file and the base filename of the RPM
-  # v1.0.0 (deprecated in v2)
-  echo "::set-output name=rpm_file_path::$rpm_file_path"
-  echo "::set-output name=rpm_file_basename::$(basename "$rpm_file_path")"
 
   echo "Built ${rpm_file_paths_count} RPMs: "
   echo "$rpm_file_paths" | tr '|' '\n' | sed -e 's/^/    /'
