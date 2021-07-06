@@ -23,7 +23,7 @@ copy_local_dir_into_container()
 container__build_rpms()
 {
   docker exec "$BUILD_CONTAINER" /bin/bash -c \
-    "su -l build_user -c 'cd simp-core; git fetch origin; git checkout $SIMP_CORE_REF_FOR_BUILDING_RPMS; bundle; bundle exec rake pkg:single[\$PWD/${BUILD_PATH_BASENAME}]'"
+    "su -l build_user -c 'cd simp-core; git fetch origin; git checkout $SIMP_CORE_REF_FOR_BUILDING_RPMS; bundle; bundle update --conservative simp-rake-helpers; bundle exec rake pkg:single[\$PWD/${BUILD_PATH_BASENAME}]'"
 }
 
 # Set up GPG to run non-interactively and sign RPMs
