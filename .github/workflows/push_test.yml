@@ -35,8 +35,8 @@ jobs:
              path_to_build: 'tests/pupmod'
              expected_rpm_count: 2
          build_container:
-           - 'docker.io/simpproject/simp_build_centos8:latest'
-           - 'docker.io/simpproject/simp_build_centos7:latest'
+           - 'centos8'
+           - 'centos7'
     steps:
       - name: 'Ensure `rpm` is installed'
         run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
@@ -52,7 +52,7 @@ jobs:
           gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
           path_to_build: ${{ matrix.build.path_to_build }}
-          simp_builder_docker_image: ${{ matrix.build_container }}
+          simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ matrix.build_container }}:latest'
       - name: 'Validate RPM & GPG files for ${{ matrix.build.label }}'
         env:
           rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
