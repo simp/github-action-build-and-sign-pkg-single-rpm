@@ -5,70 +5,90 @@
 # ------------------------------------------------------------------------------
 
 # Pull down the build container and copy the local directory into it
-start_build_container()
+start_container()
 {
-  docker pull "$BUILD_IMAGE"
-  docker rm -f "$BUILD_CONTAINER" &> /dev/null || :
-  docker run --rm -dt --name "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash
+  local image="$1"
+  local container_name="$2"
+  docker pull "$image"
+  docker rm -f "$container_name" &> /dev/null || :
+  docker run --rm -dt --name "$container_name" "$image" /bin/bash
 }
 
 copy_local_dir_into_container()
 {
-  docker cp ./ "$BUILD_CONTAINER:$BUILD_PATH"
-  docker exec "$BUILD_CONTAINER" /bin/bash -c "chown --reference=\"\$(dirname '$BUILD_PATH')\" -R '$BUILD_PATH'"
+  local container_name="$1"
+  local build_path="$2"
+  docker cp ./ "$container_name:$build_path"
+  docker exec "$container_name" /bin/bash -c "chown --reference=\"\$(dirname '$build_path')\" -R '$build_path'"
 }
 
 # 1. Ensure simp-core is checked out to a stable ref for RPM builds
 # 2. Build RPM(s) with `rake pkg:single`
 container__build_rpms()
 {
-  docker exec "$BUILD_CONTAINER" /bin/bash -c \
+  local container_name="$1"
+  docker exec "$container_name" /bin/bash -c \
     "su -l build_user -c 'cd simp-core; git fetch origin; git checkout $SIMP_CORE_REF_FOR_BUILDING_RPMS; bundle; bundle update --conservative simp-rake-helpers; bundle exec rake pkg:single[\$PWD/${BUILD_PATH_BASENAME}]'"
 }
 
 # Set up GPG to run non-interactively and sign RPMs
 container__setup_gpg_signing_key()
 {
+  local container_name="$1"
+
   # Add the GPG signing key
   # shellcheck disable=SC2016
-  docker exec -i -e "KEY=$SIMP_DEV_GPG_SIGNING_KEY" "$BUILD_CONTAINER" /bin/bash -c \
+  docker exec -i -e "KEY=$SIMP_DEV_GPG_SIGNING_KEY" "$container_name" /bin/bash -c \
     'echo "$KEY" | su -l build_user -c "gpg --batch --import"'
 
   # Set up preset GPG passphrase
   # --------------------------------------
-  docker exec -i "$BUILD_CONTAINER" /bin/bash -c \
+  docker exec -i "$container_name" /bin/bash -c \
     "su -l build_user -c 'echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf; gpg-connect-agent reloadagent /bye'"
 
   # shellcheck disable=SC2016
   keygrip_cmd="$(printf 'grp="$(gpg --with-keygrip --with-colons -K "%s" | awk -F: "/grp:/ {print \$10}")"; /usr/libexec/gpg-preset-passphrase --preset %s <<< %s' "$SIMP_DEV_GPG_SIGNING_KEY_ID" '"$grp"' "$(printf "'\$PASS'\n")" )"
-  docker exec -e "PASS=$SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE" -i "$BUILD_CONTAINER" /bin/bash -c \
+  docker exec -e "PASS=$SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE" -i "$container_name" /bin/bash -c \
     "su -l build_user -c 'echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf ; gpg-connect-agent reloadagent /bye; $keygrip_cmd'"
 }
 
 # GPG Sign the RPMs!
 container__gpg_sign_rpms()
 {
+  local container_name="$1"
+  local build_path="$2"
+
   # shellcheck disable=SC2016
   sign_cmd="$(printf 'rpmsign --define "_gpg_name %s" --define "_gpg_path ~/.gnupg" --resign ' "$SIMP_DEV_GPG_SIGNING_KEY_ID")"
-  docker exec -i "$BUILD_CONTAINER" /bin/bash -c \
-    "su -l build_user -c 'ls -1 $BUILD_PATH/dist/*.rpm | xargs $sign_cmd'"
+  docker exec -i "$container_name" /bin/bash -c \
+    "su -l build_user -c 'ls -1 $build_path/dist/*.rpm | xargs $sign_cmd'"
 }
 
 # Export the GPG public key
 container__export_gpg_public_key()
 {
+  local container_name="$1"
+  local build_path="$2"
+
   # shellcheck disable=SC2016
   export_cmd="$(printf 'gpg --armor --export "%s" > "%s/dist/%s.pub.asc"' \
     "$SIMP_DEV_GPG_SIGNING_KEY_ID" \
-    "$BUILD_PATH" \
+    "$build_path" \
     "$RPM_GPG_KEY_EXPORT_NAME" \
   )"
-  docker exec -i "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c '$export_cmd'"
+  docker exec -i "$container_name" /bin/bash -c "su -l build_user -c '$export_cmd'"
 }
 
-copy_dist_from_container(){ docker cp "$BUILD_CONTAINER:$BUILD_PATH/dist" ./ ; }
+copy_dist_from_container(){
+  local container_name="$1"
+  local build_path="$2"
+  docker cp "$container_name:$build_path/dist" ./
+}
 
-remove_build_container(){ docker container rm -f "$BUILD_CONTAINER" ; }
+remove_container(){
+  local container_name="$1"
+  docker container rm -f "$container_name"
+}
 
 set_github_output_variables()
 {
@@ -103,9 +123,11 @@ set_github_output_variables()
 
 PATH_TO_BUILD="${PATH_TO_BUILD:-.}"
 BUILD_IMAGE="${SIMP_BUILD_IMAGE:-docker.io/simpproject/simp_build_centos8:latest}"
-BUILD_CONTAINER=build_el8
+SIGNING_IMAGE="${SIMP_SIGNING_IMAGE:-docker.io/simpproject/simp_build_centos8:latest}"
+BUILD_CONTAINER=simp_pkg_builder
 BUILD_PATH=/home/build_user/simp-core/_pupmod_to_build
 BUILD_PATH_BASENAME="$(basename "$BUILD_PATH")"
+SIGNING_CONTAINER=sign_el8
 RPM_GPG_KEY_EXPORT_NAME="${RPM_GPG_KEY_EXPORT_NAME:-RPM-GPG-KEY-SIMP-UNSTABLE-2}"
 
 # So far we haven't needed to log into the docker registry to pull the image
@@ -120,12 +142,18 @@ fi
 cd "$PATH_TO_BUILD"  # start in local project dir
 rm -rf dist          # remove all previous builds
 
-start_build_container
-copy_local_dir_into_container
-container__build_rpms
-container__setup_gpg_signing_key
-container__gpg_sign_rpms
-container__export_gpg_public_key
-copy_dist_from_container  # Copy dist/ (RPMs and GPG public key) back out to local filesystem
-remove_build_container
+start_container "$BUILD_IMAGE" "$BUILD_CONTAINER"
+copy_local_dir_into_container "$BUILD_CONTAINER" "$BUILD_PATH"
+container__build_rpms "$BUILD_CONTAINER"
+copy_dist_from_container "$BUILD_CONTAINER" "$BUILD_PATH"
+remove_container "$BUILD_CONTAINER"
+
+start_container "$SIGNING_IMAGE" "$SIGNING_CONTAINER"
+copy_local_dir_into_container "$SIGNING_CONTAINER" "$BUILD_PATH"
+container__setup_gpg_signing_key "$SIGNING_CONTAINER"
+container__gpg_sign_rpms "$SIGNING_CONTAINER" "$BUILD_PATH"
+container__export_gpg_public_key "$SIGNING_CONTAINER" "$BUILD_PATH"
+copy_dist_from_container "$SIGNING_CONTAINER" "$BUILD_PATH"
+remove_container "$SIGNING_CONTAINER"
+
 set_github_output_variables
