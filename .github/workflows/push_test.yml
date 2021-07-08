@@ -36,6 +36,7 @@ jobs:
              expected_rpm_count: 2
          build_container:
            - 'docker.io/simpproject/simp_build_centos8:latest'
+           - 'docker.io/simpproject/simp_build_centos7:latest'
     steps:
       - name: 'Ensure `rpm` is installed'
         run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
