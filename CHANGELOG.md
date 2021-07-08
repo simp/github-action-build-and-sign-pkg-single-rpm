@@ -17,6 +17,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Removed
 -->
 
+## [2.2.0] - 2021-07-09
+
+### Added
+
+- RPMs are now built and signed from separate containers
+- RPMs can now be built from the EL7 RPM build container
+
+
 ## [2.1.0] - 2021-07-07
 
 ### Fixed
@@ -24,13 +32,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Update simp-rake-helpers to the latest version (with conservative dep
   updates) before building.
 
-<!--
-### Added
-
-### Changed
-
-### Removed
--->
 
 ## [2.0.0] - 2021-07-01
 
@@ -68,4 +69,5 @@ Initial release!
 [1.0.0]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/releases/tag/1.0.0
 [2.0.0]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/1.0.0...2.0.0
 [2.1.0]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.0.0...2.1.0
-[Unreleased]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.1.0...HEAD
+[2.2.0]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.1.0...2.2.0
+[Unreleased]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.2.0...HEAD

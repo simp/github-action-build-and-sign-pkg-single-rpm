@@ -24,19 +24,19 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
        matrix:
+         build_container:
+           - 'centos8'
+           - 'centos7'
          build:
-           - label: 'multiple asset RPMs'
+           - label: 'multiple RPMs'
              path_to_build: 'tests/asset-with-multiple-packages'
              expected_rpm_count: 4
-           - label: 'single asset RPM'
+           - label: 'single RPM'
              path_to_build: 'tests/asset-with-single-package'
              expected_rpm_count: 2
            - label: 'pupmod RPM'
              path_to_build: 'tests/pupmod'
              expected_rpm_count: 2
-         build_container:
-           - 'centos8'
-           - 'centos7'
     steps:
       - name: 'Ensure `rpm` is installed'
         run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
