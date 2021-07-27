@@ -14,6 +14,7 @@ start_container()
   docker run --rm -dt --name "$container_name" "$image" /bin/bash
 }
 
+
 copy_local_dir_into_container()
 {
   local container_name="$1"
@@ -127,6 +128,7 @@ SIGNING_IMAGE="${SIMP_SIGNING_IMAGE:-docker.io/simpproject/simp_build_centos8:la
 BUILD_CONTAINER=simp_pkg_builder
 BUILD_PATH=/home/build_user/simp-core/_pupmod_to_build
 BUILD_PATH_BASENAME="$(basename "$BUILD_PATH")"
+PREBUILD_ROOT_COMMANDS="${PREBUILD_ROOT_COMMANDS:-}"
 SIGNING_CONTAINER=sign_el8
 RPM_GPG_KEY_EXPORT_NAME="${RPM_GPG_KEY_EXPORT_NAME:-RPM-GPG-KEY-SIMP-UNSTABLE-2}"
 
@@ -144,6 +146,10 @@ rm -rf dist          # remove all previous builds
 
 start_container "$BUILD_IMAGE" "$BUILD_CONTAINER"
 copy_local_dir_into_container "$BUILD_CONTAINER" "$BUILD_PATH"
+
+if [ -n "$PREBUILD_ROOT_COMMANDS" ]; then
+  docker exec -i "$BUILD_CONTAINER" $PREBUILD_ROOT_COMMANDS
+fi
 container__build_rpms "$BUILD_CONTAINER"
 copy_dist_from_container "$BUILD_CONTAINER" "$BUILD_PATH"
 remove_container "$BUILD_CONTAINER"
