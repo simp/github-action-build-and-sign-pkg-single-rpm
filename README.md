@@ -148,6 +148,12 @@ the Pull Request submitter is trusted):
     <td>No</td>
     <td>If "yes", enables verbose logging while building the RPM<br /><em>Default:</em> <code>yes</code></td>
   </tr>
+
+  <tr>
+    <td><strong><code>prebuild_root_commands</code></strong></td>
+    <td>No</td>
+    <td>Commands to execute inside the root container as root prior to building any RPMs<br /><em>Default:</em> <code></code></td>
+  </tr>
 </table>
 
 
@@ -176,6 +182,7 @@ the Pull Request submitter is trusted):
     <td>Local absolute path to RPM `dist/` dir</td>
   </tr>
 </table>
+
 
 
 ### :warning: Security implications :warning:
