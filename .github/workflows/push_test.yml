@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - releases/*
+      - test/*
 
 jobs:
   lint_shell:

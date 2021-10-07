@@ -142,6 +142,12 @@ the Pull Request submitter is trusted):
     <td>No</td>
     <td>A ref (usually tagged release) in simp-core that is stable enough to build RPMs<br /><em>Default:</em> <code>6.5.0-1</code></td>
   </tr>
+
+  <tr>
+    <td><strong><code>verbose</code></strong></td>
+    <td>No</td>
+    <td>If "yes", enables verbose logging while building the RPM<br /><em>Default:</em> <code>yes</code></td>
+  </tr>
 </table>
 
 

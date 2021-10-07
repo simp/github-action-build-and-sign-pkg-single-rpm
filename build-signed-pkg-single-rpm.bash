@@ -27,7 +27,10 @@ copy_local_dir_into_container()
 container__build_rpms()
 {
   local container_name="$1"
-  docker exec "$container_name" /bin/bash -c \
+  docker exec \
+    -e "SIMP_RAKE_PKG_verbose=$SIMP_RAKE_PKG_verbose" \
+    -e "SIMP_PKG_verbose=$SIMP_PKG_verbose" \
+    "$container_name" /bin/bash -c \
     "su -l build_user -c 'cd simp-core; git fetch origin; git checkout $SIMP_CORE_REF_FOR_BUILDING_RPMS; bundle; bundle update --conservative simp-rake-helpers; bundle exec rake pkg:single[\$PWD/${BUILD_PATH_BASENAME}]'"
 }
 
@@ -129,6 +132,8 @@ BUILD_PATH=/home/build_user/simp-core/_pupmod_to_build
 BUILD_PATH_BASENAME="$(basename "$BUILD_PATH")"
 SIGNING_CONTAINER=sign_el8
 RPM_GPG_KEY_EXPORT_NAME="${RPM_GPG_KEY_EXPORT_NAME:-RPM-GPG-KEY-SIMP-UNSTABLE-2}"
+SIMP_RAKE_PKG_verbose="${SIMP_RAKE_PKG_verbose:-no}"
+SIMP_PKG_verbose="${SIMP_PKG_verbose:-no}"
 
 # So far we haven't needed to log into the docker registry to pull the image
 # but at some point, we probably will:

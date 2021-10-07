@@ -29,6 +29,10 @@ inputs:
     description: 'A ref (usually tagged release) in simp-core that is stable enough to build RPMs'
     required: false
     default: '6.5.0-1'
+  verbose:
+    description: 'If "yes", enables verbose logging while building the RPM'
+    required: false
+    default: 'yes'
 
 outputs:
   rpm_file_paths:
@@ -58,5 +62,7 @@ runs:
         PATH_TO_BUILD: ${{ inputs.path_to_build }}
         SIMP_CORE_REF_FOR_BUILDING_RPMS: ${{ inputs.simp_core_ref_for_building_rpms }}
         SIMP_BUILD_IMAGE: ${{ inputs.simp_builder_docker_image }}
+        SIMP_RAKE_PKG_verbose: ${{ inputs.verbose }}
+        SIMP_PKG_verbose: ${{ inputs.verbose }}
       run: ${{ github.action_path }}/build-signed-pkg-single-rpm.bash
 
