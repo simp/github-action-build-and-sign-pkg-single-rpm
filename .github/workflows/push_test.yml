@@ -54,7 +54,6 @@ jobs:
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
           path_to_build: ${{ matrix.build.path_to_build }}
           simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ matrix.build_container }}:latest'
-          prebuild_root_commands: yum install -y  centos-release-scl dejavu-fonts-common dejavu-sans-fonts dejavu-sans-mono-fonts dejavu-serif-fonts fontconfig libjpeg-devel python-pip python-virtualenv rh-python36 zlib-devel
 
 
       - name: 'Validate RPM & GPG files for ${{ matrix.build.label }}'

@@ -148,12 +148,6 @@ the Pull Request submitter is trusted):
     <td>No</td>
     <td>If "yes", enables verbose logging while building the RPM<br /><em>Default:</em> <code>yes</code></td>
   </tr>
-
-  <tr>
-    <td><strong><code>prebuild_root_commands</code></strong></td>
-    <td>No</td>
-    <td>Commands to execute inside the root container as root prior to building any RPMs<br /><em>Default:</em> <code></code></td>
-  </tr>
 </table>
 
 
@@ -184,7 +178,6 @@ the Pull Request submitter is trusted):
 </table>
 
 
-
 ### :warning: Security implications :warning:
 
 To sign RPMs, the action requires the **secret (aka private) key** of your GPG
@@ -193,9 +186,12 @@ poses [security risks][protecting your private key] that you should be aware of
 and understand.
 
 The action does what it can to prevent exposure of the private signing key and
-its passphrase; the data never touches the runner's or build container's
-filesystems outside of a keyring, and they are handled as environment variables
-in a way that should not expose them to the action logs.
+its passphrase:
+
+* secrets are piped directly into the GPG keyring in the container
+* raw secrets never touch the filesystem on the runner or build container
+* the secrets are handled as environment variables
+  in a way that should not expose them to the action logs.
 
 However, make sure to:
 

@@ -33,10 +33,6 @@ inputs:
     description: 'If "yes", enables verbose logging while building the RPM'
     required: false
     default: 'yes'
-  prebuild_root_commands:
-    description: 'Commands to execute inside the root container as root prior to building any RPMs'
-    required: false
-    default: ''
 
 outputs:
   rpm_file_paths:
@@ -68,6 +64,5 @@ runs:
         SIMP_BUILD_IMAGE: ${{ inputs.simp_builder_docker_image }}
         SIMP_RAKE_PKG_verbose: ${{ inputs.verbose }}
         SIMP_PKG_verbose: ${{ inputs.verbose }}
-        PREBUILD_ROOT_COMMANDS: ${{ inputs.prebuild_root_commands }}
       run: ${{ github.action_path }}/build-signed-pkg-single-rpm.bash
 
