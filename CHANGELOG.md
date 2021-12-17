@@ -24,12 +24,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - RPMs are now built with verbose logging when input `verbose` is `yes`
 
-### Changed
-
-### Fixed
-
-### Removed
-
 ## [2.2.0] - 2021-07-09
 
 ### Added
