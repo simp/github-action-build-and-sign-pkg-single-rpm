@@ -6,17 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 
-<!--
 ## [Unreleased]
 
 ### Added
 
-### Changed
+- New env var `$CONTAINER_EXE` sets container to either `docker` or `podman`
+  (default: `docker`)
 
 ### Fixed
 
-### Removed
--->
+- Summary of built RPMs is now legible
+
 
 ## [2.3.0] - 2021-12-16
 
