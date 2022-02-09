@@ -6,7 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 
+
+<!--
 ## [Unreleased]
+
+### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+-->
+
+## [2.4.0] - 2022-02-09
 
 ### Added
 
@@ -16,7 +29,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Only process/copy the top-level `dist/*.rpm` files (only those files are
-  signed)
+  signed; this change prevents race between signed & unsigned in repos like
+  pkg-r10k)
 
 ### Fixed
 
@@ -83,4 +97,5 @@ Initial release!
 [2.1.0]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.0.0...2.1.0
 [2.2.0]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.1.0...2.2.0
 [2.3.0]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.2.0...2.3.0
-[Unreleased]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.3.0...HEAD
+[2.4.0]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.3.0...2.4.0
+[Unreleased]: https://github.com/simp/github-action-build-and-sign-pkg-single-rpm/compare/2.4.0...HEAD
