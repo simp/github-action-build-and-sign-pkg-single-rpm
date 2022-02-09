@@ -13,6 +13,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - New env var `$CONTAINER_EXE` sets container to either `docker` or `podman`
   (default: `docker`)
 
+### Changed
+
+- Only process/copy the top-level `dist/*.rpm` files (only those files are
+  signed)
+
 ### Fixed
 
 - Summary of built RPMs is now legible

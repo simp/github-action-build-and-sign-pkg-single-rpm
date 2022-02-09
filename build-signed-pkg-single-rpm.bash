@@ -97,13 +97,13 @@ remove_container(){
 set_github_output_variables()
 {
   # shellcheck disable=SC2010
-  rpm_file="$(ls -1r dist/*.rpm | grep -v '\.src\.rpm$' | head -1)"
+  rpm_file="$(ls -1 dist/*.rpm | grep -v '\.src\.rpm$' | head -1)"
   rpm_file_path="$(realpath "$rpm_file")"
   gpg_file="$(find "dist" -name "${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
   export gpg_file_path=''
   gpg_file_path="$(realpath "$gpg_file")"
 
-  rpm_file_paths="$(find "$PWD/dist" -name \*.rpm)"
+  rpm_file_paths="$(ls -1 "$PWD"/dist/*.rpm)"
   rpm_file_paths_count="$(echo "$rpm_file_paths" | wc -l)"
 
   # Prep to output array on a single line for GHA variable
