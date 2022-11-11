@@ -111,9 +111,10 @@ set_github_output_variables()
   gha_rpm_file_paths="${gha_rpm_file_paths//$'\n'/'%0A'}"
   gha_rpm_file_paths="${gha_rpm_file_paths//$'\r'/'%0D'}"
 
-  echo "::set-output name=rpm_file_paths::$gha_rpm_file_paths"
-  echo "::set-output name=rpm_gpg_file::$(realpath "$gpg_file")"
-  echo "::set-output name=rpm_dist_dir::$(dirname "$rpm_file_path")"
+  # shellcheck disable=SC2129
+  echo "{rpm_file_paths}={$gha_rpm_file_paths}" >> "$GITHUB_OUTPUT"
+  echo "{rpm_gpg_file}={$(realpath "$gpg_file")}" >> "$GITHUB_OUTPUT"
+  echo "{rpm_dist_dir}={$(dirname "$rpm_file_path")}" >> "$GITHUB_OUTPUT"
 
   echo "Built ${rpm_file_paths_count} RPMs: "
   echo "$rpm_file_paths" | tr '|' '\n' | sed -e 's/^\//    /'

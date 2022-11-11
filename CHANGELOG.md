@@ -4,20 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-
-
-
-<!--
 ## [Unreleased]
-
-### Added
 
 ### Changed
 
-### Fixed
+* Updated bash and project GHA from [`::set-output` to environment files][env_files]
+* Updated project GHA actions to use `checkout@v3` and `ubuntu-latest`
 
-### Removed
--->
+[env_files]: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
 
 ## [2.4.0] - 2022-02-09
 

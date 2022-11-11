@@ -10,7 +10,7 @@ on:
 jobs:
   check_tag:
     name: 'Tag must be SemVer'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       update_v_branch: ${{ steps.check-tag.outputs.update_v_branch }}
     steps:
@@ -18,18 +18,18 @@ jobs:
         id: check-tag
         run: |
           if [[ ${{ github.event.release.tag_name }} =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::set-output name=update_v_branch::true"
+            echo "{update_v_branch}={true}" >> "$GITHUB_OUTPUT"
           else
-            echo "::set-output name=update_v_branch::false"
+            echo "{update_v_branch}={false}" >> "$GITHUB_OUTPUT"
           fi
 
   release_bump_v_branch:
     name: 'Update `v*` branch on release'
     needs: [check_tag]
     if: needs.check_tag.outputs.update_v_branch == 'true'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Need full checkout to push to gitlab mirror
       - name: 'Set HEAD of vX branch to release tag'

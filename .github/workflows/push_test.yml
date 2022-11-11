@@ -10,7 +10,7 @@ on:
 jobs:
   lint_shell:
     name: Lint shell script
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -22,7 +22,7 @@ jobs:
 
   test_action:
     name: Build & Sign
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
        matrix:
          build_container:
@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: 'Ensure `rpm` is installed'
         run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           clean: true
