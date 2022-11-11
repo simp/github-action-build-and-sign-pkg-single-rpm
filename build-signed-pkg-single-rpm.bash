@@ -97,8 +97,6 @@ remove_container(){
 set_github_output_variables()
 {
   # shellcheck disable=SC2010
-  rpm_file="$(ls -1 dist/*.rpm | grep -v '\.src\.rpm$' | head -1)"
-  rpm_file_path="$(realpath "$rpm_file")"
   gpg_file="$(find "dist" -name "${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
   export gpg_file_path=''
   gpg_file_path="$(realpath "$gpg_file")"
@@ -106,15 +104,22 @@ set_github_output_variables()
   rpm_file_paths="$(ls -1 "$PWD"/dist/*.rpm)"
   rpm_file_paths_count="$(echo "$rpm_file_paths" | wc -l)"
 
-  # Prep to output array on a single line for GHA variable
-  gha_rpm_file_paths="${rpm_file_paths//'%'/'%25'}"
-  gha_rpm_file_paths="${gha_rpm_file_paths//$'\n'/'%0A'}"
-  gha_rpm_file_paths="${gha_rpm_file_paths//$'\r'/'%0D'}"
+  echo "rpm_file_paths: '$rpm_file_paths'"
+  echo "rpm_file_paths_count: '$rpm_file_paths_count'"
+  find . -iname '*.rpm'
 
-  # shellcheck disable=SC2129
-  echo "rpm_file_paths=$gha_rpm_file_paths" | tee -a "$GITHUB_OUTPUT"
-  echo "rpm_gpg_file=$(realpath "$gpg_file")" | tee -a "$GITHUB_OUTPUT"
-  echo "rpm_dist_dir=$(dirname "$rpm_file_path")" | tee -a "$GITHUB_OUTPUT"
+  # Prep to output array on a single line for GHA variable
+  gha_delimiter="$(echo "${GITHUB_RUN_ID:-$RANDOM}${GITHUB_SHA:-$RANDOM}$RANDOM" | base64 )"
+  gha_delimiter="${gha_delimiter//=/}"
+  gha_delimiter="${gha_delimiter^^}"
+
+  {
+    echo "rpm_file_paths<<$gha_delimiter"
+    echo "$rpm_file_paths"
+    echo "$gha_delimiter"
+    echo "rpm_gpg_file=$gpg_file_path"
+    echo "rpm_dist_dir=$PWD/dist"
+  } >> "$GITHUB_OUTPUT"
 
   echo "Built ${rpm_file_paths_count} RPMs: "
   echo "$rpm_file_paths" | tr '|' '\n' | sed -e 's/^\//    /'
@@ -126,7 +131,6 @@ set_github_output_variables()
 # ------------------------------------------------------------------------------
 # main
 # ------------------------------------------------------------------------------
-
 
 CONTAINER_EXE="${CONTAINER_EXE:-docker}"
 PATH_TO_BUILD="${PATH_TO_BUILD:-.}"
