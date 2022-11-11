@@ -45,7 +45,7 @@ jobs:
         with:
           fetch-depth: 0
           clean: true
-      - uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+      - uses: simp/github-action-build-and-sign-pkg-single-rpm@${{ github.ref }}
         name: 'Build & sign RPM(s) under ${{ matrix.build.path_to_build }}'
         id: build-and-sign-rpm
         with:
