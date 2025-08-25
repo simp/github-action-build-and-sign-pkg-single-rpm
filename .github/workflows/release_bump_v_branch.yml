@@ -29,7 +29,7 @@ jobs:
     if: needs.check_tag.outputs.update_v_branch == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0  # Need full checkout to push to gitlab mirror
       - name: 'Set HEAD of vX branch to release tag'
