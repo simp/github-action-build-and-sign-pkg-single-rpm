@@ -12,7 +12,7 @@ jobs:
     name: Lint shell script
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           clean: true
@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: 'Ensure `rpm` is installed'
         run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           clean: true
