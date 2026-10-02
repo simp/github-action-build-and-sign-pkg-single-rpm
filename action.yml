@@ -24,7 +24,7 @@ inputs:
       SIMP build container image to stage build.  So far, the action has only
       been tested with (and probably only works with) the EL8 build image'
     required: false
-    default: 'docker.io/simpproject/simp_build_centos8:latest'
+    default: 'ghcr.io/simp/simp-el8-build:latest'
   simp_core_ref_for_building_rpms:
     description: 'A ref (usually tagged release) in simp-core that is stable enough to build RPMs'
     required: false

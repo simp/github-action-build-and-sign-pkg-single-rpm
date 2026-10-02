@@ -134,7 +134,7 @@ the Pull Request submitter is trusted):
     <td><strong><code>simp_builder_docker_image</code></strong></td>
     <td>No</td>
     <td>SIMP build container image to stage build.  So far, the action has only been tested with (and probably only works with) the EL8 build image'
-  <br /><em>Default:</em> <code>docker.io/simpproject/simp_build_centos8:latest</code></td>
+  <br /><em>Default:</em> <code>ghcr.io/simp/simp-el8-build:latest</code></td>
   </tr>
 
   <tr>

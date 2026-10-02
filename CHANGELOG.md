@@ -17,6 +17,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Removed
 -->
 
+## [Unreleased]
+
+### Changed
+
+- The default build image and the signing image are now
+  `ghcr.io/simp/simp-el8-build:latest`. The previous default,
+  `docker.io/simpproject/simp_build_centos8`, is a retired CentOS 8 image
+  last rebuilt in 2023, and the signing image could not be overridden
+  through the action's inputs.
+- The self-test workflow builds on the EL8, EL9 and EL10 ghcr images instead
+  of the retired CentOS 7/8 images.
+
 ## [2.4.1] - 2022-11-11
 
 ### Changed
