@@ -134,8 +134,8 @@ set_github_output_variables()
 
 CONTAINER_EXE="${CONTAINER_EXE:-docker}"
 PATH_TO_BUILD="${PATH_TO_BUILD:-.}"
-BUILD_IMAGE="${SIMP_BUILD_IMAGE:-docker.io/simpproject/simp_build_centos8:latest}"
-SIGNING_IMAGE="${SIMP_SIGNING_IMAGE:-docker.io/simpproject/simp_build_centos8:latest}"
+BUILD_IMAGE="${SIMP_BUILD_IMAGE:-ghcr.io/simp/simp-el8-build:latest}"
+SIGNING_IMAGE="${SIMP_SIGNING_IMAGE:-ghcr.io/simp/simp-el8-build:latest}"
 BUILD_CONTAINER=simp_pkg_builder
 BUILD_PATH=/home/build_user/simp-core/_pupmod_to_build
 BUILD_PATH_BASENAME="$(basename "$BUILD_PATH")"
